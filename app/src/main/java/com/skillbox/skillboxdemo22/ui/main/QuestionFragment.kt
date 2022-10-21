@@ -1,41 +1,70 @@
 package com.skillbox.skillboxdemo22.ui.main
 
-import android.animation.ObjectAnimator
-import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.TextView
+import com.google.android.material.snackbar.Snackbar
+import com.skillbox.skillboxdemo22.Answer
 import com.skillbox.skillboxdemo22.Game
-import com.skillbox.skillboxdemo22.R
+import com.skillbox.skillboxdemo22.Navigation
+import com.skillbox.skillboxdemo22.databinding.FragmentQuestionBinding
 
 class QuestionFragment : Fragment() {
+    lateinit var binding: FragmentQuestionBinding
+    var questionId: Int = 0
 
     companion object {
-        fun newInstance() = QuestionFragment()
+        fun bundle(questionId: Int): Bundle {
+            val bundle = Bundle()
+            bundle.putInt("QUESTION_ID", questionId)
+            return bundle
+        }
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        return inflater.inflate(R.layout.fragment_question, container, false)
+        binding = FragmentQuestionBinding.inflate(inflater)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val textView = requireView().findViewById<TextView>(R.id.textView)
-        val animator = ObjectAnimator.ofFloat(
-            textView,
-            "alpha",
-            0F,
-        )
+        questionId = requireArguments().getInt("QUESTION_ID")
+        val question = Game.questions.first { quest -> quest.id == questionId }
 
-        animator.duration = 2_000
-        animator.start()
+        binding.textView.text = question.title
+
+        binding.hint.setOnClickListener {
+            Snackbar.make(
+                binding.root,
+                question.hint,
+                Snackbar.LENGTH_LONG,
+            ).show()
+        }
+
+        listOf(
+            binding.answer1,
+            binding.answer2,
+            binding.answer3,
+        ).forEachIndexed { index, button ->
+            initButton(button, answer = question.answers[index])
+        }
+    }
+
+    private fun initButton(button: Button, answer: Answer) {
+        button.text = answer.title
+        button.setOnClickListener {
+            Navigation.answer(
+                fragmentManager = parentFragmentManager,
+                questionId = questionId,
+                answer = answer.title,
+            )
+        }
     }
 }

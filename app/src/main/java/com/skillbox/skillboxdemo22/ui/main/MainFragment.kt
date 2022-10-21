@@ -12,11 +12,6 @@ import com.skillbox.skillboxdemo22.Game
 import com.skillbox.skillboxdemo22.R
 
 class MainFragment : Fragment() {
-
-    companion object {
-        fun newInstance() = MainFragment()
-    }
-
     private lateinit var viewModel: MainViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,9 +34,12 @@ class MainFragment : Fragment() {
 
         val button = requireView().findViewById<Button>(R.id.button)
         button.setOnClickListener {
+            val bundle = QuestionFragment.bundle(questionId = Game.startQuestion)
+
             parentFragmentManager
                 .beginTransaction()
-                .replace(R.id.container, QuestionFragment.newInstance())
+                .setCustomAnimations(R.anim.slide_in, R.anim.fade_out)
+                .replace(R.id.container, QuestionFragment::class.java, bundle)
                 .commit()
         }
     }
